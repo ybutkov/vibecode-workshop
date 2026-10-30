@@ -15,8 +15,8 @@ Milestone lead: assign a fresh session (`milestone-lead`). Human owner: UNCLE. R
 | Step | Outcome | Depends on | Human owner | State / PR |
 |---|---|---|---|---|
 | M1.1 | Our fork runs at the assigned URL and reports its deployed revision | Team access / organiser handout | UNCLE | blocked (no SSH/URL handout yet) |
-| M1.2 | The player can complete the core Color Lines gameplay loop on desktop and phone | Starter repo (local) | UNCLE | ready |
-| M1.3 | The player's active board, preview, score, and high score survive page reloads (`localStorage`) | M1.2 | UNCLE | planned |
+| M1.2 | The player can complete the core Color Lines gameplay loop on desktop and phone | Starter repo (local) | UNCLE | merged ([PR #1](https://github.com/ybutkov/vibecode-workshop/pull/1)) |
+| M1.3 | The player's active board, preview, score, and high score survive page reloads (`localStorage`) | M1.2 | UNCLE | ready |
 | M1.4 | A teammate can complete the whole journey on desktop and phone; observed failures are corrected | M1.3 | UNCLE | planned |
 
 ### M1.1 — The live starting point (Blocked on organiser SSH/URL handout)
@@ -30,15 +30,15 @@ Milestone lead: assign a fresh session (`milestone-lead`). Human owner: UNCLE. R
 ### M1.2 — Core action (Playable Color Lines 9×9)
 
 - **Normal input:**
-  - Opening the page renders a $9 \times 9$ board with initial balls, 3 semi-transparent upcoming preview balls on their target cells, current score, and a "New Game" button.
-  - Selecting a ball highlights it; clicking an empty cell (or a preview cell) with an unblocked orthogonal path moves the ball there.
-  - If the move does not form a line of 5+, the 3 previewed balls spawn (if the player stepped onto a preview cell, that ball spawns on another random empty cell) and 3 new transparent preview balls appear.
-  - If a move **or** a newly spawned ball forms 5 or more matching balls horizontally, vertically, or diagonally, those balls clear from the board and increase the score (and if cleared by the player's move, no new balls spawn that turn).
+  - [x] Opening the page renders a $9 \times 9$ board with initial balls, 3 semi-transparent upcoming preview balls on their target cells, current score, and a "New Game" button.
+  - [x] Selecting a ball highlights it; clicking an empty cell (or a preview cell) with an unblocked orthogonal path moves the ball there.
+  - [x] If the move does not form a line of 5+, the 3 previewed balls spawn (if the player stepped onto a preview cell, that ball spawns on another random empty cell) and 3 new transparent preview balls appear.
+  - [x] If a move **or** a newly spawned ball forms 5 or more matching balls horizontally, vertically, or diagonally, those balls clear from the board and increase the score (and if cleared by the player's move, no new balls spawn that turn).
 - **Empty / Reset state:**
-  - Clicking "New Game" resets the score to 0 and starts a fresh $9 \times 9$ board with initial balls and 3 previews.
+  - [x] Clicking "New Game" resets the score to 0 and starts a fresh $9 \times 9$ board with initial balls and 3 previews.
 - **Failure / Blocked cases:**
-  - Clicking an unreachable cell (no unblocked orthogonal path) rejects the move with clear visual feedback and does not consume the turn.
-  - When the board fills completely (81 balls), the game displays a clear Game Over state and allows starting a new game.
+  - [x] Clicking an unreachable cell (no unblocked orthogonal path) rejects the move with clear visual feedback and does not consume the turn.
+  - [x] When the board fills completely (81 balls), the game displays a clear Game Over state and allows starting a new game.
 
 ### M1.3 — Persistence (Local browser session)
 

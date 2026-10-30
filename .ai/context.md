@@ -1,3 +1,3 @@
 # Current focus
 
-Coder (`cb74b5cb-2f7d-4992-89a8-b0d556ecc958`) completed M1.2 on branch `m1.2-playable-color-lines` from base SHA `d1038f1bfa86dbcbb250e952e49247e1dcd38701` (implementation SHA `9a1f1ec3213ea9a279a3aded1957dcaa37034889`) and recorded test + desktop/phone browser verification in `.ai/work/M1.2/validation.md`. Next up: Milestone Lead dispatches an independent `Reviewer` session to review `m1.2-playable-color-lines` and write `.ai/work/M1.2/review.md`.
+M1.2 (`m1.2-playable-color-lines`) was reviewed (`APPROVE` at `701ece51c76ff56374b9852b984ece7ecb39e83c`) and merged into `main` via [PR #1](https://github.com/ybutkov/vibecode-workshop/pull/1) (merge commit `40c81a7c41a190e40c04e24d802ee7afac700287`). Next up: Milestone Lead audits `main` and prepares `.ai/work/M1.3/brief.md` for step `M1.3` (`localStorage` persistence for active board, preview balls, current score, and personal high score).
