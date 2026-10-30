@@ -72,11 +72,11 @@ Before UI implementation, the layout and visual states must follow this referenc
 ## Handoff
 
 - **Human owner:** UNCLE
-- **Milestone lead session:** `a0774d1e-26ce-4509-bb44-979fd6af3260` (Gemini)
-- **Branch:** `m1.2-playable-color-lines` (to be branched from `main` at `d1038f1bfa86dbcbb250e952e49247e1dcd38701`)
-- **Coder session:** Pending dispatch — fresh session using `.ai/roles/coder.md` and `.ai/work/M1.2/brief.md`
-- **Independent reviewer session:** Pending coder completion — separate fresh session (preferably a different model family) using `.ai/roles/reviewer.md`, `.ai/work/M1.2/brief.md`, committed diff, and `.ai/work/M1.2/validation.md`
-- **Committer session:** Pending reviewer `APPROVE` — separate fresh session using `.ai/roles/committer.md` to open and merge the PR into `ybutkov/vibecode-workshop` `main`
+- **Milestone lead session:** `a0774d1e-26ce-4509-bb44-979fd6af3260`
+- **Branch:** `m1.2-playable-color-lines` (branched from `main` at `d1038f1bfa86dbcbb250e952e49247e1dcd38701`)
+- **Coder session:** `cb74b5cb-2f7d-4992-89a8-b0d556ecc958` (implementation SHA `9a1f1ec3213ea9a279a3aded1957dcaa37034889`)
+- **Independent reviewer session:** `76cdfaa7-ad7a-45b1-a48a-e91bd1a7f1c7` (verdict `APPROVE` on reviewed SHA `701ece51c76ff56374b9852b984ece7ecb39e83c`)
+- **Committer session:** `58fc76bf-8158-4b34-b76b-dcf860f00302`
 - **Evidence paths:**
   - Brief: `.ai/work/M1.2/brief.md`
   - Validation (coder): `.ai/work/M1.2/validation.md`
