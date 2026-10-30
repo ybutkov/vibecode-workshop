@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const assets = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/style.css', ['style.css', 'text/css; charset=utf-8']],
+  ['/game.js', ['game.js', 'text/javascript; charset=utf-8']],
 ]);
 
 export function createApp({ revision = process.env.APP_REVISION || 'development' } = {}) {

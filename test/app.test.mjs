@@ -18,6 +18,9 @@ test('page, CSS and health are reachable and health identifies the served revisi
   const css = await fetch(`${origin}/style.css`);
   assert.equal(css.status, 200);
   assert.match(css.headers.get('content-type'), /text\/css/);
+  const js = await fetch(`${origin}/game.js`);
+  assert.equal(js.status, 200);
+  assert.match(js.headers.get('content-type'), /text\/javascript/);
   const health = await fetch(`${origin}/api/health`);
   assert.deepEqual(await health.json(), { ok: true, revision: 'test-revision' });
 });

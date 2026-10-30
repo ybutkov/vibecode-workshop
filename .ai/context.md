@@ -1,3 +1,3 @@
 # Current focus
 
-M1 plan approved by human owner UNCLE (`IDEA.md` and `PLAN.md`). `M1.1` (remote deploy) is blocked awaiting the organiser's SSH/URL handout. Next up: Milestone Lead takes over to brief and coordinate `M1.2` (playable $9 \times 9$ Color Lines core game loop on desktop and phone) starting locally from `main`. See `.ai/sessions/2026-10-30-m1-project-plan.md`.
+Coder (`cb74b5cb-2f7d-4992-89a8-b0d556ecc958`) completed M1.2 on branch `m1.2-playable-color-lines` from base SHA `d1038f1bfa86dbcbb250e952e49247e1dcd38701` (implementation SHA `9a1f1ec3213ea9a279a3aded1957dcaa37034889`) and recorded test + desktop/phone browser verification in `.ai/work/M1.2/validation.md`. Next up: Milestone Lead dispatches an independent `Reviewer` session to review `m1.2-playable-color-lines` and write `.ai/work/M1.2/review.md`.
