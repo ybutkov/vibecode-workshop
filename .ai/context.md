@@ -1,3 +1,3 @@
 # Current focus
 
-M13.27 native guest deploy on `ikodo0/m13.27-native-guest-deploy`. Release pruning, a 2G install/build scope, and one deploy lock are committed and waiting for re-review (`c90b3a1`, `f11b2ea`). No guest was available, so the memory scope was proven only on this machine's user manager. Nothing has been pushed or merged.
+M1 plan approved by human owner UNCLE (`IDEA.md` and `PLAN.md`). `M1.1` (remote deploy) is blocked awaiting the organiser's SSH/URL handout. Next up: Milestone Lead takes over to brief and coordinate `M1.2` (playable $9 \times 9$ Color Lines core game loop on desktop and phone) starting locally from `main`. See `.ai/sessions/2026-10-30-m1-project-plan.md`.

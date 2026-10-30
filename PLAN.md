@@ -1,10 +1,8 @@
 # Project plan
 
-Draft only. Agree the goal with your team before implementation. Replace the example steps with outcomes that fit your idea. Keep assigned IDs permanent.
-
 ## Goal
 
-A named user can complete one useful journey at our team's live URL. See IDEA.md for the problem and constraints.
+A player visiting our team's live URL on desktop or phone can play a complete local session of Classic Color Lines ($9 \times 9$) — seeing semi-transparent on-board previews of the 3 upcoming balls, moving balls along unblocked orthogonal paths (including onto preview cells), clearing horizontal/vertical/diagonal lines of 5+ for points, keeping their active game and high score across page reloads, and restarting after Game Over. See [IDEA.md](IDEA.md) for full rules.
 
 ## Working model
 
@@ -12,34 +10,44 @@ Project lead → one milestone lead → one step at a time through coder → ind
 
 ## M1 — First useful live journey
 
-Milestone lead: assign a fresh session. Human owner: fill in. Release: only after the team accepts the journey.
+Milestone lead: assign a fresh session (`milestone-lead`). Human owner: UNCLE. Release: only after the team accepts the journey and receives the organiser guest handout.
 
 | Step | Outcome | Depends on | Human owner | State / PR |
 |---|---|---|---|---|
-| M1.1 | Our fork runs at the assigned URL and reports its deployed revision | Team access | assign | draft |
-| M1.2 | The user can complete the core action | M1.1 | assign | draft |
-| M1.3 | The result survives the persistence boundary our idea requires | M1.2 | assign | draft |
-| M1.4 | A teammate can complete the whole journey; observed failures are corrected | M1.3 | assign | draft |
+| M1.1 | Our fork runs at the assigned URL and reports its deployed revision | Team access / organiser handout | UNCLE | blocked (no SSH/URL handout yet) |
+| M1.2 | The player can complete the core Color Lines gameplay loop on desktop and phone | Starter repo (local) | UNCLE | ready |
+| M1.3 | The player's active board, preview, score, and high score survive page reloads (`localStorage`) | M1.2 | UNCLE | planned |
+| M1.4 | A teammate can complete the whole journey on desktop and phone; observed failures are corrected | M1.3 | UNCLE | planned |
 
-### M1.1 — The live starting point
+### M1.1 — The live starting point (Blocked on organiser SSH/URL handout)
 
-- [ ] Every teammate has access to the same team fork.
-- [ ] The assigned SSH connection reaches our team environment.
-- [ ] Our page is reachable at the assigned HTTPS URL.
+- [ ] Every teammate has access to the same team fork (`ybutkov/vibecode-workshop`).
+- [ ] The assigned SSH connection reaches our team environment (`vc-team`).
+- [ ] Our page is reachable at the assigned HTTPS URL (`https://team-NN.intra.land`).
 - [ ] `/api/health` reports the revision we intended to deploy.
 - [ ] Another teammate opens the page on a phone.
 
-### M1.2 — Core action
+### M1.2 — Core action (Playable Color Lines 9×9)
 
-Write acceptance cases for the assigned idea: normal input, empty state and one failure. State the expected result rather than the implementation.
+- **Normal input:**
+  - Opening the page renders a $9 \times 9$ board with initial balls, 3 semi-transparent upcoming preview balls on their target cells, current score, and a "New Game" button.
+  - Selecting a ball highlights it; clicking an empty cell (or a preview cell) with an unblocked orthogonal path moves the ball there.
+  - If the move does not form a line of 5+, the 3 previewed balls spawn (if the player stepped onto a preview cell, that ball spawns on another random empty cell) and 3 new transparent preview balls appear.
+  - If a move **or** a newly spawned ball forms 5 or more matching balls horizontally, vertically, or diagonally, those balls clear from the board and increase the score (and if cleared by the player's move, no new balls spawn that turn).
+- **Empty / Reset state:**
+  - Clicking "New Game" resets the score to 0 and starts a fresh $9 \times 9$ board with initial balls and 3 previews.
+- **Failure / Blocked cases:**
+  - Clicking an unreachable cell (no unblocked orthogonal path) rejects the move with clear visual feedback and does not consume the turn.
+  - When the board fills completely (81 balls), the game displays a clear Game Over state and allows starting a new game.
 
-### M1.3 — Persistence
+### M1.3 — Persistence (Local browser session)
 
-Specify what must survive: reload, another visitor, process restart, or all three. Choose deliberately; browser storage is not shared server storage.
+- **What survives:** Reloading the page in the same browser restores the exact in-progress $9 \times 9$ board, the 3 upcoming preview positions/colors, the current score, the personal high score, and Game Over status from `localStorage`.
+- **Fallback / Corrupted state:** If `localStorage` is empty or contains invalid data, the app cleanly initializes a fresh game without crashing.
 
 ### M1.4 — Feedback
 
-Record one observed user problem, the resulting acceptance criterion and the result after correction. Add new scope as a new step instead of hiding it inside a fix.
+- Record one observed user problem from a teammate testing on desktop/phone, the resulting acceptance criterion, and the result after correction. Add new scope as a new step instead of hiding it inside a fix.
 
 ## M2 — Improve the demonstrated journey
 

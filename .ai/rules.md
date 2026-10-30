@@ -6,5 +6,6 @@
 - Deployments use archived commits in separate release directories. Durable data belongs outside those directories, for example under `~/.local/share/vibecode-workshop/data/`.
 - Workshop DNS, SSH access and containers are organiser-managed. Use assigned connection details.
 - Deployment runs on the assigned Linux guest as `vc-team` with no sudo. The guest provides `/etc/vc-guest-contract` containing `user-app-v1`, the lingering user unit `vc-app.service`, and a `~/workshop` placeholder that deploy must not rewrite. It is not a laptop tool. `npm run deploy:preview` changes nothing and can run elsewhere.
+- Never add `Co-authored-by:`, `Generated with`, AI attribution trailers, or session links to git commit messages or PR descriptions.
 
 Add constraints when code or observed behaviour establishes them. Workflow rules live in AGENTS.md.
