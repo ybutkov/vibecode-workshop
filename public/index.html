@@ -3,24 +3,50 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Your workshop starting point: one idea, one team, one useful live demo.">
-  <title>Your first live step · Vibecode workshop</title>
+  <meta name="description" content="Classic Color Lines 9x9 puzzle game — align 5 or more matching balls horizontally, vertically, or diagonally.">
+  <title>Color Lines 9×9 · Vibecode Workshop</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header><a class="wordmark" href="/">VIBECODE<span> / WORKSHOP</span></a><span class="status">Starting point</span></header>
-  <main>
-    <p class="eyebrow">01 / Make something useful</p>
-    <h1>An idea is a start.<br>A working demo is proof.</h1>
-    <p class="intro">Your app is running. Now pick one person, one problem and one action you can help them complete.</p>
-    <ol class="steps">
-      <li><span class="number">01</span><h2>Agree the goal.</h2><p>Write who it helps and what they can do. Challenge what you are assuming.</p></li>
-      <li><span class="number">02</span><h2>Build one step.</h2><p>Give the agent an outcome and cases to check. Keep the change small enough to review.</p></li>
-      <li><span class="number">03</span><h2>Watch it work.</h2><p>Review the change. Let someone try the task. Use what happens to choose your next step.</p></li>
-    </ol>
-    <a class="action" href="https://intra.land/vibecode">Open the workshop <span aria-hidden="true">↗</span></a>
-    <p class="next">Your next move: agree the first useful journey with your team.</p>
+  <header class="site-header">
+    <div class="brand-group">
+      <a class="wordmark" href="/">VIBECODE<span> / COLOR LINES 9×9</span></a>
+      <h1>Color Lines</h1>
+    </div>
+    <div class="hud-bar" role="region" aria-label="Game controls and score">
+      <div class="hud-stat">
+        <span class="hud-label">Score</span>
+        <strong id="score-value" class="hud-score">0</strong>
+      </div>
+      <div class="hud-stat hud-upcoming" title="3 semi-transparent preview balls shown on their future board cells">
+        <span class="hud-label">Next 3</span>
+        <div id="upcoming-swatches" class="upcoming-swatches" aria-label="Upcoming ball colors"></div>
+      </div>
+      <button id="new-game-btn" class="new-game-btn" type="button">New Game</button>
+    </div>
+  </header>
+
+  <main class="game-layout">
+    <div class="status-bar">
+      <p id="status-message" class="status-message" role="status" aria-live="polite">
+        Select a ball to move along an open path.
+      </p>
+    </div>
+
+    <div id="game-over-banner" class="game-over-banner" role="alert" hidden>
+      <strong>Game Over</strong> — Final Score: <span id="game-over-score">0</span>. Press <em>New Game</em> to play again.
+    </div>
+
+    <section class="board-shell" aria-label="Color Lines 9 by 9 Board">
+      <div id="game-board" class="game-board" role="grid" aria-label="9 by 9 game grid"></div>
+    </section>
+
+    <p class="rules-hint">
+      Align <strong>5+</strong> matching balls horizontally, vertically, or diagonally. Small translucent balls mark where the next 3 balls will spawn.
+    </p>
   </main>
-  <footer><span>Plan small. Review honestly. Ship live.</span><a href="/api/health">Check this app</a></footer>
+
+  <script type="module" src="/game.js"></script>
 </body>
 </html>
