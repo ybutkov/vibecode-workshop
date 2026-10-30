@@ -354,16 +354,31 @@ h1 {
 
   .hud-bar {
     justify-content: space-between;
-    gap: 0.4rem;
+    gap: 0.3rem;
   }
 
   .hud-stat {
-    padding: 0.25rem 0.5rem;
+    padding: 0.22rem 0.42rem;
+    gap: 0.3rem;
+  }
+
+  .hud-label {
+    font-size: 0.64rem;
+  }
+
+  .hud-score {
+    font-size: 0.92rem;
+    min-width: 1.4ch;
+  }
+
+  .preview-chip {
+    width: 0.72rem;
+    height: 0.72rem;
   }
 
   .new-game-btn {
-    padding: 0.38rem 0.7rem;
-    font-size: 0.8rem;
+    padding: 0.34rem 0.58rem;
+    font-size: 0.76rem;
   }
 
   .game-layout {
