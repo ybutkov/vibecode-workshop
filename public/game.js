@@ -2,6 +2,7 @@ export const GRID_SIZE = 9;
 export const INITIAL_BALL_COUNT = 5;
 export const PREVIEW_COUNT = 3;
 export const MIN_LINE_LENGTH = 5;
+export const STORAGE_KEY = 'colorLines.session.v1';
 
 export const COLORS = [
   'red',
@@ -23,6 +24,15 @@ export const COLOR_INFO = {
   orange: { label: 'Tangerine Orange', short: 'O' },
 };
 
+function getDefaultStorage() {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage || null;
+  } catch {
+    return null;
+  }
+}
+
 export function createEmptyBoard() {
   return Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
 }
@@ -32,10 +42,13 @@ export function cloneBoard(board) {
 }
 
 export function cloneState(state) {
+  const score = Number.isInteger(state.score) && state.score >= 0 ? state.score : 0;
+  const rawHighScore = Number.isInteger(state.highScore) && state.highScore >= 0 ? state.highScore : 0;
   return {
     board: cloneBoard(state.board),
     previews: state.previews.map(p => ({ ...p })),
-    score: state.score,
+    score,
+    highScore: Math.max(rawHighScore, score),
     selected: state.selected ? { ...state.selected } : null,
     gameOver: Boolean(state.gameOver),
     status: state.status,
@@ -215,7 +228,7 @@ export function findPath(board, startRow, startCol, targetRow, targetCol) {
   return null;
 }
 
-export function createInitialState({ rng = Math.random } = {}) {
+export function createInitialState({ rng = Math.random, highScore = 0 } = {}) {
   const board = createEmptyBoard();
   const empty = getEmptyCells(board);
 
@@ -232,17 +245,172 @@ export function createInitialState({ rng = Math.random } = {}) {
   }
 
   const previews = generatePreviewBalls(board, PREVIEW_COUNT, { rng });
+  const normalizedHighScore = Number.isInteger(highScore) && highScore >= 0 ? highScore : 0;
 
   return {
     board,
     previews,
     score: 0,
+    highScore: normalizedHighScore,
     selected: null,
     gameOver: false,
     status: 'Select a ball to move along an open path.',
     lastInvalidCell: null,
     lastClearedCells: [],
   };
+}
+
+export function serializeState(state) {
+  const score = Number.isInteger(state.score) && state.score >= 0 ? state.score : 0;
+  const rawHighScore = Number.isInteger(state.highScore) && state.highScore >= 0 ? state.highScore : 0;
+  return {
+    board: cloneBoard(state.board),
+    previews: state.previews.map(p => ({ row: p.row, col: p.col, color: p.color })),
+    score,
+    highScore: Math.max(rawHighScore, score),
+    gameOver: Boolean(state.gameOver),
+    status: typeof state.status === 'string' ? state.status : 'Select a ball to move along an open path.',
+  };
+}
+
+export function validateSavedState(candidate) {
+  if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) {
+    return null;
+  }
+
+  if (!Array.isArray(candidate.board) || candidate.board.length !== GRID_SIZE) {
+    return null;
+  }
+
+  const board = createEmptyBoard();
+  let placedCount = 0;
+  for (let r = 0; r < GRID_SIZE; r += 1) {
+    const row = candidate.board[r];
+    if (!Array.isArray(row) || row.length !== GRID_SIZE) {
+      return null;
+    }
+    for (let c = 0; c < GRID_SIZE; c += 1) {
+      const cell = row[c];
+      if (cell !== null && !COLORS.includes(cell)) {
+        return null;
+      }
+      board[r][c] = cell;
+      if (cell !== null) {
+        placedCount += 1;
+      }
+    }
+  }
+
+  if (!Number.isInteger(candidate.score) || candidate.score < 0) {
+    return null;
+  }
+
+  let rawHighScore = 0;
+  if (candidate.highScore !== undefined) {
+    if (!Number.isInteger(candidate.highScore) || candidate.highScore < 0) {
+      return null;
+    }
+    rawHighScore = candidate.highScore;
+  }
+
+  if (typeof candidate.gameOver !== 'boolean') {
+    return null;
+  }
+
+  const totalCells = GRID_SIZE * GRID_SIZE;
+  const emptyCount = totalCells - placedCount;
+  if (candidate.gameOver !== (placedCount === totalCells)) {
+    return null;
+  }
+
+  if (!Array.isArray(candidate.previews)) {
+    return null;
+  }
+
+  const maxPreviews = Math.min(PREVIEW_COUNT, emptyCount);
+  if (candidate.gameOver) {
+    if (candidate.previews.length !== 0) {
+      return null;
+    }
+  } else if (emptyCount > 0) {
+    if (candidate.previews.length < 1 || candidate.previews.length > maxPreviews) {
+      return null;
+    }
+  }
+
+  const previews = [];
+  const seenCoords = new Set();
+  for (const item of candidate.previews) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      return null;
+    }
+    const { row, col, color } = item;
+    if (!isInsideBoard(row, col) || !COLORS.includes(color)) {
+      return null;
+    }
+    if (board[row][col] !== null) {
+      return null;
+    }
+    const key = `${row},${col}`;
+    if (seenCoords.has(key)) {
+      return null;
+    }
+    seenCoords.add(key);
+    previews.push({ row, col, color });
+  }
+
+  const score = candidate.score;
+  const highScore = Math.max(rawHighScore, score);
+  const gameOver = candidate.gameOver;
+  const status = typeof candidate.status === 'string' && candidate.status.trim().length > 0
+    ? candidate.status
+    : (gameOver
+      ? `Game Over — Final Score: ${score}`
+      : 'Select a ball to move along an open path.');
+
+  return {
+    board,
+    previews,
+    score,
+    highScore,
+    selected: null,
+    gameOver,
+    status,
+    lastInvalidCell: null,
+    lastClearedCells: [],
+  };
+}
+
+export function loadSavedState(storage = getDefaultStorage()) {
+  if (!storage || typeof storage.getItem !== 'function') {
+    return null;
+  }
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    if (typeof raw !== 'string' || raw.trim() === '') {
+      return null;
+    }
+    const parsed = JSON.parse(raw);
+    return validateSavedState(parsed);
+  } catch {
+    return null;
+  }
+}
+
+export function saveState(state, storage = getDefaultStorage()) {
+  if (!storage || typeof storage.setItem !== 'function') {
+    return false;
+  }
+  const validated = validateSavedState(state);
+  if (!validated) {
+    return false;
+  }
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(serializeState(validated)));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function applyMove(state, targetRow, targetCol, { rng = Math.random } = {}) {
@@ -292,6 +460,7 @@ export function applyMove(state, targetRow, targetCol, { rng = Math.random } = {
       next.board[cell.row][cell.col] = null;
     }
     next.score += moveClear.points;
+    next.highScore = Math.max(next.highScore || 0, next.score);
     next.lastClearedCells = moveClear.cells;
 
     // If the winning move stepped onto a preview cell, relocate that displaced preview to another free cell
@@ -352,6 +521,7 @@ export function applyMove(state, targetRow, targetCol, { rng = Math.random } = {
       next.board[cell.row][cell.col] = null;
     }
     next.score += spawnClear.points;
+    next.highScore = Math.max(next.highScore || 0, next.score);
     next.lastClearedCells = spawnClear.cells;
   }
 
@@ -413,9 +583,10 @@ export function handleCellClick(state, row, col, { rng = Math.random } = {}) {
   return applyMove(state, row, col, { rng });
 }
 
-export function initGameApp(doc = document, { rng = Math.random } = {}) {
+export function initGameApp(doc = document, { rng = Math.random, storage } = {}) {
   const boardEl = doc.getElementById('game-board');
   const scoreEl = doc.getElementById('score-value');
+  const highScoreEl = doc.getElementById('high-score-value');
   const statusEl = doc.getElementById('status-message');
   const newGameBtn = doc.getElementById('new-game-btn');
   const gameOverBanner = doc.getElementById('game-over-banner');
@@ -426,10 +597,16 @@ export function initGameApp(doc = document, { rng = Math.random } = {}) {
     return null;
   }
 
-  let state = createInitialState({ rng });
+  const activeStorage = storage !== undefined ? storage : getDefaultStorage();
+  const restored = loadSavedState(activeStorage);
+  let state = restored || createInitialState({ rng, highScore: 0 });
+  saveState(state, activeStorage);
 
   function render() {
     scoreEl.textContent = String(state.score);
+    if (highScoreEl) {
+      highScoreEl.textContent = String(state.highScore);
+    }
     statusEl.textContent = state.status;
     statusEl.dataset.state = state.gameOver
       ? 'game-over'
@@ -519,6 +696,7 @@ export function initGameApp(doc = document, { rng = Math.random } = {}) {
 
         cellBtn.addEventListener('click', () => {
           state = handleCellClick(state, r, c, { rng });
+          saveState(state, activeStorage);
           render();
         });
 
@@ -527,9 +705,16 @@ export function initGameApp(doc = document, { rng = Math.random } = {}) {
     }
   }
 
-  newGameBtn.addEventListener('click', () => {
-    state = createInitialState({ rng });
+  function resetToNewGame() {
+    const preservedHighScore = Math.max(state.highScore || 0, state.score || 0);
+    state = createInitialState({ rng, highScore: preservedHighScore });
+    saveState(state, activeStorage);
     render();
+    return cloneState(state);
+  }
+
+  newGameBtn.addEventListener('click', () => {
+    resetToNewGame();
   });
 
   render();
@@ -538,18 +723,16 @@ export function initGameApp(doc = document, { rng = Math.random } = {}) {
     getState: () => cloneState(state),
     setState: (nextState) => {
       state = cloneState(nextState);
+      saveState(state, activeStorage);
       render();
     },
     clickCell: (r, c) => {
       state = handleCellClick(state, r, c, { rng });
+      saveState(state, activeStorage);
       render();
       return cloneState(state);
     },
-    resetGame: () => {
-      state = createInitialState({ rng });
-      render();
-      return cloneState(state);
-    },
+    resetGame: () => resetToNewGame(),
   };
 
   if (typeof window !== 'undefined') {

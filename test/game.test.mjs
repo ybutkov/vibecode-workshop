@@ -4,6 +4,7 @@ import {
   GRID_SIZE,
   INITIAL_BALL_COUNT,
   PREVIEW_COUNT,
+  STORAGE_KEY,
   COLORS,
   createEmptyBoard,
   countPlacedBalls,
@@ -11,7 +12,29 @@ import {
   findPath,
   findLinesToClear,
   handleCellClick,
+  serializeState,
+  validateSavedState,
+  loadSavedState,
+  saveState,
 } from '../public/game.js';
+
+function createMemoryStorage(initial = {}) {
+  const store = new Map(Object.entries(initial));
+  return {
+    getItem(key) {
+      return store.has(key) ? store.get(key) : null;
+    },
+    setItem(key, value) {
+      store.set(key, String(value));
+    },
+    removeItem(key) {
+      store.delete(key);
+    },
+    dump() {
+      return Object.fromEntries(store.entries());
+    },
+  };
+}
 
 function makeDeterministicRng(seed = 42) {
   let s = seed >>> 0;
@@ -257,4 +280,162 @@ test('filling all 81 cells triggers Game Over and blocks further moves', () => {
   const afterOver = handleCellClick(endState, 0, 1);
   assert.equal(afterOver.gameOver, true);
   assert.equal(afterOver.selected, null);
+});
+
+test('saveState and loadSavedState persist and restore active board, previews, score, highScore, and Game Over', () => {
+  const storage = createMemoryStorage();
+  const rng = makeDeterministicRng(303);
+  const initial = createInitialState({ rng, highScore: 0 });
+  assert.equal(initial.highScore, 0);
+
+  // Set up a mid-game state where a line clear increases score and highScore
+  const board = createEmptyBoard();
+  board[4][0] = 'blue';
+  board[4][1] = 'blue';
+  board[4][2] = 'blue';
+  board[4][3] = 'blue';
+  board[1][4] = 'blue';
+  board[7][7] = 'red';
+
+  let state = {
+    board,
+    previews: [
+      { row: 0, col: 0, color: 'green' },
+      { row: 0, col: 8, color: 'yellow' },
+      { row: 8, col: 0, color: 'purple' },
+    ],
+    score: 14,
+    highScore: 20,
+    selected: { row: 1, col: 4 },
+    gameOver: false,
+    status: 'Selected',
+    lastInvalidCell: null,
+    lastClearedCells: [],
+  };
+
+  // Move (1,4) -> (4,4) clears 5 blue balls (+10 -> score 24, highScore becomes 24)
+  state = handleCellClick(state, 4, 4, { rng });
+  assert.equal(state.score, 24);
+  assert.equal(state.highScore, 24);
+
+  assert.equal(saveState(state, storage), true);
+  const restored = loadSavedState(storage);
+  assert.ok(restored);
+  assert.deepEqual(restored.board, state.board);
+  assert.deepEqual(restored.previews, state.previews);
+  assert.equal(restored.score, 24);
+  assert.equal(restored.highScore, 24);
+  assert.equal(restored.gameOver, false);
+  assert.equal(restored.selected, null);
+
+  // Starting a New Game with preserved highScore resets score to 0 while keeping highScore 24
+  const resetState = createInitialState({ rng, highScore: restored.highScore });
+  assert.equal(resetState.score, 0);
+  assert.equal(resetState.highScore, 24);
+  assert.equal(countPlacedBalls(resetState.board), INITIAL_BALL_COUNT);
+  assert.equal(saveState(resetState, storage), true);
+
+  const restoredAfterReset = loadSavedState(storage);
+  assert.equal(restoredAfterReset.score, 0);
+  assert.equal(restoredAfterReset.highScore, 24);
+
+  // Full 81-ball Game Over state also saves and restores cleanly
+  const fullBoard = createEmptyBoard();
+  for (let r = 0; r < GRID_SIZE; r += 1) {
+    for (let c = 0; c < GRID_SIZE; c += 1) {
+      fullBoard[r][c] = COLORS[(r + c) % COLORS.length];
+    }
+  }
+  const gameOverState = {
+    board: fullBoard,
+    previews: [],
+    score: 36,
+    highScore: 48,
+    selected: null,
+    gameOver: true,
+    status: 'Game Over — Final Score: 36',
+    lastInvalidCell: null,
+    lastClearedCells: [],
+  };
+  assert.equal(saveState(gameOverState, storage), true);
+  const restoredGameOver = loadSavedState(storage);
+  assert.ok(restoredGameOver);
+  assert.equal(restoredGameOver.gameOver, true);
+  assert.equal(countPlacedBalls(restoredGameOver.board), 81);
+  assert.equal(restoredGameOver.previews.length, 0);
+  assert.equal(restoredGameOver.score, 36);
+  assert.equal(restoredGameOver.highScore, 48);
+});
+
+test('validateSavedState and loadSavedState reject empty, malformed, or invalid state and handle storage exceptions safely', () => {
+  // Empty storage returns null
+  const emptyStorage = createMemoryStorage();
+  assert.equal(loadSavedState(emptyStorage), null);
+
+  // Malformed JSON returns null
+  const malformedStorage = createMemoryStorage({ [STORAGE_KEY]: '{bad-json' });
+  assert.equal(loadSavedState(malformedStorage), null);
+
+  const baseValid = serializeState(createInitialState({ rng: makeDeterministicRng(11), highScore: 12 }));
+  assert.ok(validateSavedState(baseValid));
+
+  // Wrong board dimensions
+  assert.equal(validateSavedState({ ...baseValid, board: [[null]] }), null);
+
+  // Unknown ball color on board
+  const badColorBoard = baseValid.board.map(row => [...row]);
+  badColorBoard[0][0] = 'magenta';
+  assert.equal(validateSavedState({ ...baseValid, board: badColorBoard }), null);
+
+  // Preview overlapping a placed ball
+  let placedCell = null;
+  for (let r = 0; r < GRID_SIZE && !placedCell; r += 1) {
+    for (let c = 0; c < GRID_SIZE && !placedCell; c += 1) {
+      if (baseValid.board[r][c] !== null) {
+        placedCell = { row: r, col: c };
+      }
+    }
+  }
+  const overlappingPreviews = [
+    { row: placedCell.row, col: placedCell.col, color: 'red' },
+    baseValid.previews[1],
+    baseValid.previews[2],
+  ];
+  assert.equal(validateSavedState({ ...baseValid, previews: overlappingPreviews }), null);
+
+  // Duplicate preview coordinates
+  const duplicatePreviews = [
+    baseValid.previews[0],
+    { ...baseValid.previews[0] },
+    baseValid.previews[2],
+  ];
+  assert.equal(validateSavedState({ ...baseValid, previews: duplicatePreviews }), null);
+
+  // Out-of-bounds preview coordinate
+  const outOfBoundsPreviews = [
+    { row: 9, col: 0, color: 'red' },
+    baseValid.previews[1],
+    baseValid.previews[2],
+  ];
+  assert.equal(validateSavedState({ ...baseValid, previews: outOfBoundsPreviews }), null);
+
+  // Negative or non-integer score / highScore
+  assert.equal(validateSavedState({ ...baseValid, score: -5 }), null);
+  assert.equal(validateSavedState({ ...baseValid, score: 1.5 }), null);
+  assert.equal(validateSavedState({ ...baseValid, highScore: -1 }), null);
+
+  // Inconsistent gameOver flag (true when board is not full)
+  assert.equal(validateSavedState({ ...baseValid, gameOver: true }), null);
+
+  // Storage throwing exceptions does not throw uncaught errors
+  const throwingStorage = {
+    getItem() {
+      throw new Error('Storage disabled');
+    },
+    setItem() {
+      throw new Error('QuotaExceededError');
+    },
+  };
+  assert.equal(loadSavedState(throwingStorage), null);
+  assert.equal(saveState(baseValid, throwingStorage), false);
 });

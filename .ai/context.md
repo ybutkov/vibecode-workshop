@@ -1,3 +1,3 @@
 # Current focus
 
-M1.2 (`m1.2-playable-color-lines`) was reviewed (`APPROVE` at `701ece51c76ff56374b9852b984ece7ecb39e83c`) and merged into `main` via [PR #1](https://github.com/ybutkov/vibecode-workshop/pull/1) (merge commit `40c81a7c41a190e40c04e24d802ee7afac700287`). Next up: Milestone Lead audits `main` and prepares `.ai/work/M1.3/brief.md` for step `M1.3` (`localStorage` persistence for active board, preview balls, current score, and personal high score).
+M1.3 (`m1.3-local-storage-persistence`) implementation (`0eb03408844b67e247cee85503c94c5c8e9d336f`) and validation (`.ai/work/M1.3/validation.md`) are committed on branch `m1.3-local-storage-persistence` from base `f7afe0e0780df5d54ee9a884c9ae5eb114a1bef2`. Next up: Independent Reviewer inspects the diff, runs checks and browser verification, and records `.ai/work/M1.3/review.md`.
