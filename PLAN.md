@@ -16,8 +16,8 @@ Milestone lead: assign a fresh session (`milestone-lead`). Human owner: UNCLE. R
 |---|---|---|---|---|
 | M1.1 | Our fork runs at the assigned URL and reports its deployed revision | Team access / organiser handout | UNCLE | blocked (no SSH/URL handout yet) |
 | M1.2 | The player can complete the core Color Lines gameplay loop on desktop and phone | Starter repo (local) | UNCLE | merged ([PR #1](https://github.com/ybutkov/vibecode-workshop/pull/1)) |
-| M1.3 | The player's active board, preview, score, and high score survive page reloads (`localStorage`) | M1.2 | UNCLE | ready |
-| M1.4 | A teammate can complete the whole journey on desktop and phone; observed failures are corrected | M1.3 | UNCLE | planned |
+| M1.3 | The player's active board, preview, score, and high score survive page reloads (`localStorage`) | M1.2 | UNCLE | merged ([PR #2](https://github.com/ybutkov/vibecode-workshop/pull/2)) |
+| M1.4 | A teammate can complete the whole journey on desktop and phone; observed failures are corrected | M1.3 | UNCLE | ready |
 
 ### M1.1 — The live starting point (Blocked on organiser SSH/URL handout)
 
@@ -42,8 +42,8 @@ Milestone lead: assign a fresh session (`milestone-lead`). Human owner: UNCLE. R
 
 ### M1.3 — Persistence (Local browser session)
 
-- **What survives:** Reloading the page in the same browser restores the exact in-progress $9 \times 9$ board, the 3 upcoming preview positions/colors, the current score, the personal high score, and Game Over status from `localStorage`.
-- **Fallback / Corrupted state:** If `localStorage` is empty or contains invalid data, the app cleanly initializes a fresh game without crashing.
+- [x] **What survives:** Reloading the page in the same browser restores the exact in-progress $9 \times 9$ board, the 3 upcoming preview positions/colors, the current score, the personal high score, and Game Over status from `localStorage`.
+- [x] **Fallback / Corrupted state:** If `localStorage` is empty or contains invalid data, the app cleanly initializes a fresh game without crashing.
 
 ### M1.4 — Feedback
 
