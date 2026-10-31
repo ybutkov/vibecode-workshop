@@ -25,20 +25,20 @@ A player playing Classic Color Lines ($9 \times 9$) on desktop or phone keeps th
 
 ## Acceptance
 
-- [ ] **Normal case — Active session & high score survive page reload:**
+- [x] **Normal case — Active session & high score survive page reload:**
   - Making moves (changing board positions, upcoming previews, current score, and personal high score) and reloading the page in the same browser restores the exact $9 \times 9$ placed balls, the exact upcoming preview balls (positions and colors), the current score, the personal high score (`#high-score-value`), and `gameOver` status from `localStorage`.
   - Whenever `score` increases above `highScore` (via player move line-clear or post-spawn line-clear), `highScore` updates immediately in state, DOM (`#high-score-value`), and `localStorage`.
-- [ ] **Normal case — High score survives `"New Game"` reset and Game Over:**
+- [x] **Normal case — High score survives `"New Game"` reset and Game Over:**
   - Reaching a positive score/high score and clicking `"New Game"` (either mid-game or after `Game Over`) resets the board to 5 initial placed balls, 3 upcoming previews, `score: 0`, and `gameOver: false`, while **preserving** `highScore` in both the HUD (`#high-score-value`) and `localStorage` across subsequent reloads.
   - Reloading the page while in `Game Over` state restores the full 81-ball board, `Game Over` banner (`#game-over-banner` visible with final score), `score`, and `highScore`, blocking board moves until `"New Game"` is clicked.
-- [ ] **Empty, corrupted, or unavailable `localStorage` fallback cases:**
+- [x] **Empty, corrupted, or unavailable `localStorage` fallback cases:**
   - **Empty storage:** When `localStorage` has no saved key, the app initializes a fresh valid game (`5` placed balls, `3` previews, `score: 0`, `highScore: 0`, `gameOver: false`) without errors.
   - **Corrupted JSON or invalid state shape:** If `localStorage` contains malformed JSON (e.g. `"{bad-json"`) or structurally invalid state (wrong board dimensions, unknown ball color, preview coordinate out of bounds or overlapping a placed ball, negative/non-integer score, etc.), the app ignores the corrupted state, initializes a clean fresh game without throwing any console/page error, and overwrites storage with valid state on the next save.
   - **Storage exceptions:** If `storage.getItem` or `storage.setItem` throws (e.g. disabled storage / quota error), the game continues functioning in-memory without uncaught exceptions.
-- [ ] **Access/data boundary & module contract:**
+- [x] **Access/data boundary & module contract:**
   - Pure persistence and validation functions (e.g. `STORAGE_KEY`, `serializeState` / `validateSavedState`, `loadSavedState`, `saveState`) are exported from `public/game.js` without top-level DOM/window side effects so `node --test` unit tests in `test/game.test.mjs` can deterministically test saving, restoring, high score preservation across resets, and corrupted-data fallbacks.
   - Existing HTTP and deploy contracts (`test/app.test.mjs`, `test/deploy.test.mjs`, `/api/health`, `404` on non-whitelisted paths) remain intact.
-- [ ] **Browser task (desktop and phone verification required):**
+- [x] **Browser task (desktop and phone verification required):**
   - Run the app locally and verify in a real headless browser at both **desktop (`1280×800`)** and **phone (`375×667`)** viewports:
     1. Play a turn and score points so `score > 0` and `highScore > 0`, reload the page (`location.reload()`), and verify the exact board, previews, score (`#score-value`), and high score (`#high-score-value`) are restored.
     2. Click `"New Game"`, verify `#score-value` resets to `0` while `#high-score-value` retains the high score, reload again, and confirm `#high-score-value` still persists.
@@ -59,10 +59,10 @@ A player playing Classic Color Lines ($9 \times 9$) on desktop or phone keeps th
 
 - **Human owner:** UNCLE
 - **Milestone lead session:** `a0774d1e-26ce-4509-bb44-979fd6af3260` (Gemini)
-- **Branch:** `m1.3-local-storage-persistence` (to be branched from `main` at `f7afe0e0780df5d54ee9a884c9ae5eb114a1bef2`)
-- **Coder session:** Pending dispatch
-- **Independent reviewer session:** Pending coder completion
-- **Committer session:** Pending reviewer `APPROVE`
+- **Branch:** `m1.3-local-storage-persistence` (branched from `main` at `f7afe0e0780df5d54ee9a884c9ae5eb114a1bef2`)
+- **Coder session:** `497a0904-87dd-410f-aabd-7c71a7755233` (Gemini)
+- **Independent reviewer session:** `ef1e4f10-ecfd-4964-9796-3f1a98482c0a` (Gemini)
+- **Committer session:** `0cf6c1ef-f192-4e58-81f3-d76024466596` (Gemini)
 - **Evidence paths:**
   - Brief: `.ai/work/M1.3/brief.md`
   - Validation (coder): `.ai/work/M1.3/validation.md`
